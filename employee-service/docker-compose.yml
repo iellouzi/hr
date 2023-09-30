@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  employee-service:
+    build: .
+    ports:
+      - "8083:8083"
+    depends_on:
+      - employee_db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://employeedb:3306/employeeDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - hr-service-network
+
+  employee_db:
+    container_name: employeedb
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: employeeDB
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hr-service-network
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+
+  init-script:
+    image: mysql
+    depends_on:
+      - employee_db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  hr-service-network:
+    driver: bridge

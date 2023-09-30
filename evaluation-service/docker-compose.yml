@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  evaluation-service:
+    build: .
+    ports:
+      - "8084:8084"
+    depends_on:
+      - evaluation_db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://evaluationdb:3306/evaluationDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - hr-service-network
+
+  evaluation_db:
+    container_name: evaluationdb
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: evaluationDB
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hr-service-network
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+
+  init-script:
+    image: mysql
+    depends_on:
+      - evaluation_db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  hr-service-network:
+    driver: bridge

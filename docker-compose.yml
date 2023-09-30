@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+
+  api-gateway:
+    container_name: api-gateway
+    image: "api-gateway"
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8054:8054"
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - hr-service-network
+
+  eureka-server:
+    container_name: eureka-server
+    image: "eureka-server"
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - hr-service-network
+
+  employee-service:
+    container_name: employee-service
+    image: "employee-service"
+    build:
+      context: ./employee-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    depends_on:
+      - hrDB
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://hrDB:3306/employeeDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_APPLICATION_NAME: employee-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - hr-service-network
+
+  candidate-service:
+    container_name: candidate-service
+    image: "candidate-service"
+    build:
+      context: ./candidate-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - hrDB
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://hrDB:3306/candidateDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_APPLICATION_NAME: candidate-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - hr-service-network
+
+  candidature-service:
+    container_name: candidature-service
+    image: "candidature-service"
+    build:
+      context: ./candidature-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      - hrDB
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://hrDB:3306/candidatureDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_APPLICATION_NAME: candidature-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - hr-service-network
+
+  evaluation-service:
+    container_name: evaluation-service
+    image: "evaluation-service"
+    build:
+      context: ./evaluation-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    depends_on:
+      - hrDB
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://hrDB:3306/evaluationDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_APPLICATION_NAME: evaluation-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - hr-service-network
+
+  offre-service:
+    container_name: offre-service
+    image: "offre-service"
+    build:
+      context: ./offre-service
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    depends_on:
+      - hrDB
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://hrDB:3306/offreDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_APPLICATION_NAME: offre-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - hr-service-network
+
+  app:
+    container_name: hr-react-app
+    image: "hr-application"
+    build:
+      context: ./hr-application
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - './:/app'
+    environment:
+      - NODE_ENV=production
+
+  hrDB:
+    container_name: hrDB
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hrDB
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hr-service-network
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+
+  init-script:
+    image: mysql
+    depends_on:
+      - hrDB
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  hr-service-network:
+    driver: bridge
+
+

@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'spring-boot-microservice-1'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['localhost:8080'] # Replace with the actual host and port for your microservice
+
+  - job_name: 'spring-boot-microservice-2'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['localhost:8081'] # Replace with the actual host and port for your microservice

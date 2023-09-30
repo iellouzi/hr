@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  candidate-service:
+    build: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - candidate_db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://candidatedb:3306/candidateDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - hr-service-network
+
+  candidate_db:
+    container_name: candidatedb
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: candidateDB
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hr-service-network
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+
+  init-script:
+    image: mysql
+    depends_on:
+      - candidate_db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  hr-service-network:
+    driver: bridge

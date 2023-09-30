@@ -1,0 +1,35 @@
+          {editingCandidate && editingCandidate.id === candidate.id ? (
+      // Render edit form when editingCandidate is set and matches the current candidate
+      <form onSubmit={(e) => handleUpdateCandidate(candidate.id, updatedCandidateData)}>
+        {/* Render input fields to capture the updated candidate data */}
+        {/* You can pre-populate the input fields with the candidate's current data */}
+        {/* Update the `updatedCandidateData` state on input changes */}
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={updatedCandidateData.name}
+          onChange={(e) => setUpdatedCandidateData({ ...updatedCandidateData, name: e.target.value })}
+        />     
+         <input
+        type="text"
+        name="phone"
+        placeholder="phone"
+        value={updatedCandidateData.phone}
+        onChange={(e) => setUpdatedCandidateData({ ...updatedCandidateData, phone: e.target.value })}
+      />     <input
+      type="text"
+      name="email"
+      placeholder="email"
+      value={updatedCandidateData.email}
+      onChange={(e) => setUpdatedCandidateData({ ...updatedCandidateData, email: e.target.value })}
+    />
+        {/* Repeat the same pattern for other input fields */}
+
+        <button type="submit">Save</button>
+        <button type="button" onClick={cancelEdit}>Cancel</button>
+      </form>
+    ) : (
+      // Render the edit button when not in edit mode
+      <button onClick={() => handleEditCandidate(candidate)}>Edit</button>
+    )}

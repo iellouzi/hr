@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  offre-service:
+    build: .
+    ports:
+      - "8085:8085"
+    depends_on:
+      - offre_db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://offredb:3306/offreDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - hr-service-network
+
+  offre_db:
+    container_name: offredb
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: offreDB
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hr-service-network
+    command: --init-file /docker-entrypoint-initdb.d/init.sql
+
+  init-script:
+    image: mysql
+    depends_on:
+      - offre_db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  hr-service-network:
+    driver: bridge
